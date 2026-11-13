@@ -58,54 +58,43 @@ conn.commit()
 
 
 # --------------------------------
-# Create 5 Student Objects
+# Add a New Student
 # --------------------------------
-students = [
-    Student_Master(1, "John Smith", "Computer Science",
-                   ["Python", "Database", "Networking"], 3.8),
+def add_student():
+    print("\n========== ADD NEW STUDENT ==========")
 
-    Student_Master(2, "Emily Johnson", "Mathematics",
-                   ["Calculus", "Statistics", "Algebra"], 3.6),
+    try:
+        stu_id = int(input("Enter Student ID: "))
+        stu_name = input("Enter Student Name: ")
+        stu_major = input("Enter Student Major: ")
 
-    Student_Master(3, "Michael Brown", "Engineering",
-                   ["Physics", "Robotics", "Electronics"], 3.9),
+        courses = input("Enter Student Courses (separated by commas): ")
+        stu_courses = [
+            course.strip() for course in courses.split(",") if course.strip()
+        ]
 
-    Student_Master(4, "Sarah Davis", "Biology",
-                   ["Chemistry", "Genetics", "Ecology"], 3.7),
+        stu_cgpa = float(input("Enter Student CGPA: "))
 
-    Student_Master(5, "David Wilson", "Information Technology",
-                   ["Cybersecurity", "Programming", "Web Design"], 3.5)
-]
+        if not stu_name.strip() or not stu_major.strip():
+            print("\nName and major cannot be empty!")
+            return
 
+        if not stu_courses:
+            print("\nAt least one course must be entered!")
+            return
 
-# --------------------------------
-# Create 5 Faculty Objects
-# --------------------------------
-faculty = [
-    Faculty_Master(101, "Dr. James", "Computer Science",
-                   ["Python", "Database"]),
+        if not 0.0 <= stu_cgpa <= 4.0:
+            print("\nCGPA must be between 0.0 and 4.0!")
+            return
 
-    Faculty_Master(102, "Prof. Williams", "Mathematics",
-                   ["Calculus", "Statistics"]),
+        # Create Student Object
+        student = Student_Master(
+            stu_id, stu_name, stu_major, stu_courses, stu_cgpa
+        )
 
-    Faculty_Master(103, "Dr. Anderson", "Engineering",
-                   ["Physics", "Robotics"]),
-
-    Faculty_Master(104, "Prof. Taylor", "Biology",
-                   ["Chemistry", "Genetics"]),
-
-    Faculty_Master(105, "Dr. Thomas", "Information Technology",
-                   ["Cybersecurity", "Networking"])
-]
-
-
-# --------------------------------
-# Insert Student Records
-# --------------------------------
-def insert_students():
-    for student in students:
+        # Insert Student Object into Database
         cursor.execute("""
-        INSERT OR IGNORE INTO Student_Master
+        INSERT INTO Student_Master
         VALUES (?, ?, ?, ?, ?)
         """, (
             student.stu_id,
@@ -115,27 +104,70 @@ def insert_students():
             student.stu_cgpa
         ))
 
-    conn.commit()
-    print("\nStudent records inserted successfully!")
+        conn.commit()
+        print("\nStudent added successfully!")
+
+    except ValueError:
+        print("\nInvalid input! Please enter the correct data types.")
+
+    except sqlite3.IntegrityError:
+        print("\nError! A student with this ID already exists.")
+
+    except sqlite3.Error as e:
+        print("\nDatabase Error:", e)
 
 
 # --------------------------------
-# Insert Faculty Records
+# Add a New Faculty Member
 # --------------------------------
-def insert_faculty():
-    for member in faculty:
+def add_faculty():
+    print("\n========== ADD NEW FACULTY ==========")
+
+    try:
+        fac_id = int(input("Enter Faculty ID: "))
+        fac_name = input("Enter Faculty Name: ")
+        fac_department = input("Enter Faculty Department: ")
+
+        courses = input("Enter Courses Taught (separated by commas): ")
+        fac_teaches_courses = [
+            course.strip() for course in courses.split(",") if course.strip()
+        ]
+
+        if not fac_name.strip() or not fac_department.strip():
+            print("\nName and department cannot be empty!")
+            return
+
+        if not fac_teaches_courses:
+            print("\nAt least one course must be entered!")
+            return
+
+        # Create Faculty Object
+        faculty_member = Faculty_Master(
+            fac_id, fac_name, fac_department, fac_teaches_courses
+        )
+
+        # Insert Faculty Object into Database
         cursor.execute("""
-        INSERT OR IGNORE INTO Faculty_Master
+        INSERT INTO Faculty_Master
         VALUES (?, ?, ?, ?)
         """, (
-            member.fac_id,
-            member.fac_name,
-            member.fac_department,
-            json.dumps(member.fac_teaches_courses)
+            faculty_member.fac_id,
+            faculty_member.fac_name,
+            faculty_member.fac_department,
+            json.dumps(faculty_member.fac_teaches_courses)
         ))
 
-    conn.commit()
-    print("\nFaculty records inserted successfully!")
+        conn.commit()
+        print("\nFaculty member added successfully!")
+
+    except ValueError:
+        print("\nInvalid input! Please enter the correct data types.")
+
+    except sqlite3.IntegrityError:
+        print("\nError! A faculty member with this ID already exists.")
+
+    except sqlite3.Error as e:
+        print("\nDatabase Error:", e)
 
 
 # --------------------------------
@@ -146,6 +178,10 @@ def display_students():
     records = cursor.fetchall()
 
     print("\n========== STUDENT DETAILS ==========")
+
+    if not records:
+        print("No student records found.")
+        return
 
     for record in records:
         print("\nStudent ID:", record[0])
@@ -164,6 +200,10 @@ def display_faculty():
 
     print("\n========== FACULTY DETAILS ==========")
 
+    if not records:
+        print("No faculty records found.")
+        return
+
     for record in records:
         print("\nFaculty ID:", record[0])
         print("Faculty Name:", record[1])
@@ -174,43 +214,46 @@ def display_faculty():
 # --------------------------------
 # Menu-Driven Program
 # --------------------------------
-while True:
+try:
+    while True:
 
-    print("\n================================")
-    print("       COLLEGE DATABASE")
-    print("================================")
-    print("1. Insert Student Records")
-    print("2. Insert Faculty Records")
-    print("3. Display Student Records")
-    print("4. Display Faculty Records")
-    print("5. Display All Records")
-    print("6. Exit")
+        print("\n================================")
+        print("       COLLEGE DATABASE")
+        print("================================")
+        print("1. Add a Student")
+        print("2. Add Faculty")
+        print("3. Display Student Records")
+        print("4. Display Faculty Records")
+        print("5. Display All Records")
+        print("6. Exit")
 
-    choice = input("\nEnter your choice: ")
+        choice = input("\nEnter your choice: ")
 
-    if choice == "1":
-        insert_students()
+        if choice == "1":
+            add_student()
 
-    elif choice == "2":
-        insert_faculty()
+        elif choice == "2":
+            add_faculty()
 
-    elif choice == "3":
-        display_students()
+        elif choice == "3":
+            display_students()
 
-    elif choice == "4":
-        display_faculty()
+        elif choice == "4":
+            display_faculty()
 
-    elif choice == "5":
-        display_students()
-        display_faculty()
+        elif choice == "5":
+            display_students()
+            display_faculty()
 
-    elif choice == "6":
-        print("\nExiting College Database...")
-        break
+        elif choice == "6":
+            print("\nExiting College Database...")
+            break
 
-    else:
-        print("\nInvalid choice! Please try again.")
+        else:
+            print("\nInvalid choice! Please try again.")
 
+finally:
+    # Close Database Connection
+    conn.close()
+    print("\nDatabase connection closed.")
 
-# Close Database Connection
-conn.close()
