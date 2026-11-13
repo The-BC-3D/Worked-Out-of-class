@@ -1,10 +1,6 @@
 import sqlite3
 import json
 
-
-# --------------------------------
-# Student_Master Class
-# --------------------------------
 class Student_Master:
     def __init__(self, stu_id, stu_name, stu_major, stu_courses, stu_cgpa):
         self.stu_id = stu_id
@@ -14,9 +10,6 @@ class Student_Master:
         self.stu_cgpa = stu_cgpa
 
 
-# --------------------------------
-# Faculty_Master Class
-# --------------------------------
 class Faculty_Master:
     def __init__(self, fac_id, fac_name, fac_department, fac_teaches_courses):
         self.fac_id = fac_id
@@ -25,14 +18,11 @@ class Faculty_Master:
         self.fac_teaches_courses = fac_teaches_courses
 
 
-# --------------------------------
-# Database Connection
-# --------------------------------
 conn = sqlite3.connect("college.db")
 cursor = conn.cursor()
 
 
-# Create Student Table
+
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Student_Master (
     stu_id INTEGER PRIMARY KEY,
@@ -44,7 +34,7 @@ CREATE TABLE IF NOT EXISTS Student_Master (
 """)
 
 
-# Create Faculty Table
+
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Faculty_Master (
     fac_id INTEGER PRIMARY KEY,
@@ -57,9 +47,6 @@ CREATE TABLE IF NOT EXISTS Faculty_Master (
 conn.commit()
 
 
-# --------------------------------
-# Add a New Student
-# --------------------------------
 def add_student():
     print("\n========== ADD NEW STUDENT ==========")
 
@@ -87,12 +74,12 @@ def add_student():
             print("\nCGPA must be between 0.0 and 4.0!")
             return
 
-        # Create Student Object
+     
         student = Student_Master(
             stu_id, stu_name, stu_major, stu_courses, stu_cgpa
         )
 
-        # Insert Student Object into Database
+        
         cursor.execute("""
         INSERT INTO Student_Master
         VALUES (?, ?, ?, ?, ?)
@@ -117,9 +104,7 @@ def add_student():
         print("\nDatabase Error:", e)
 
 
-# --------------------------------
-# Add a New Faculty Member
-# --------------------------------
+
 def add_faculty():
     print("\n========== ADD NEW FACULTY ==========")
 
@@ -141,12 +126,12 @@ def add_faculty():
             print("\nAt least one course must be entered!")
             return
 
-        # Create Faculty Object
+
         faculty_member = Faculty_Master(
             fac_id, fac_name, fac_department, fac_teaches_courses
         )
 
-        # Insert Faculty Object into Database
+
         cursor.execute("""
         INSERT INTO Faculty_Master
         VALUES (?, ?, ?, ?)
@@ -170,9 +155,6 @@ def add_faculty():
         print("\nDatabase Error:", e)
 
 
-# --------------------------------
-# Display Student Records
-# --------------------------------
 def display_students():
     cursor.execute("SELECT * FROM Student_Master")
     records = cursor.fetchall()
@@ -191,9 +173,6 @@ def display_students():
         print("CGPA:", record[4])
 
 
-# --------------------------------
-# Display Faculty Records
-# --------------------------------
 def display_faculty():
     cursor.execute("SELECT * FROM Faculty_Master")
     records = cursor.fetchall()
@@ -211,9 +190,6 @@ def display_faculty():
         print("Courses Taught:", ", ".join(json.loads(record[3])))
 
 
-# --------------------------------
-# Menu-Driven Program
-# --------------------------------
 try:
     while True:
 
@@ -253,7 +229,6 @@ try:
             print("\nInvalid choice! Please try again.")
 
 finally:
-    # Close Database Connection
     conn.close()
     print("\nDatabase connection closed.")
 
